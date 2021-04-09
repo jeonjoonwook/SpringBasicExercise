@@ -17,16 +17,21 @@ public class AppConfig {
 
     @Bean
     public MemberService memberService(){
+        System.out.println("call AppConfig.memberService");
         return new MemberServiceImpl(memberRepository());
     }
-
+    //memberRepository가 3번 호출되어야 할것 같은데 1번만 호출됨
     @Bean
-    public MemberRepository memberRepository(){
+    public MemberRepository memberRepository()
+    {
+        System.out.println("call AppConfig.memberRepository");
         return new MemoryMemberRepository();
     }
 
     @Bean
-    public OrderService orderService(){
+    public OrderService orderService()
+    {
+        System.out.println("call AppConfig.orderService");
         return new OrderServiceImpl(memberRepository(), discountPolicy());
     }
 
