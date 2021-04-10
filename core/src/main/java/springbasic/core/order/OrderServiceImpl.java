@@ -9,6 +9,7 @@ import springbasic.core.member.MemberRepository;
 @Component
 public class OrderServiceImpl implements OrderService {
 
+    //final 필드는 초기값이 저장되면 최종적인 값이 되어 프로그램 실행 도중 수정 불가
     private final MemberRepository memberRepository;
     private final DiscountPolicy discountPolicy;
 
