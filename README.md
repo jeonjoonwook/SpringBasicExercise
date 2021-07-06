@@ -85,7 +85,7 @@ DIP 위반
  -역할과 구현을 분리해서 자유롭게 구 객체를 조립할 수 있게 설계한다.  
  -회원 저장소와 할인 정책을 유연하게 변경 가능  
  
- ![11](https://user-images.githubusercontent.com/35962655/124605367-cb333400-dea6-11eb-9ab7-ad5c50f82d80.PNG)
+ ![11](https://user-images.githubusercontent.com/35962655/124605367-cb333400-dea6-11eb-9ab7-ad5c50f82d80.PNG)  
   역할과 구현을 충실하게 분리 잘함  
 - 다형성도 활용하고, 인터페이스와 구현 객체를 분리 잘함  
 - OCP , DIP 설계 원칙을 준수한것처럼 보이지만 아니다.  
