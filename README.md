@@ -116,8 +116,7 @@ AppConfig
 -클라이언트인 memberServiceImpl 입장에서 보면 의존관계를 마치 외부에서 주입해주는 것 같다고 해서 DI(Dependency Injection) 의존성 주입이라 한다. 
 
 할인 정책 적용  
--AppConfig의 등장으로 애플리케이션이 크게 사용영역과, 객체를 생성하고 구성하는 영역으로 분리  
-![55](https://user-images.githubusercontent.com/35962655/124606840-3cbfb200-dea8-11eb-9d74-9cf04458894c.PNG)  
+-AppConfig의 등장으로 애플리케이션이 크게 사용영역과, 객체를 생성하고 구성하는 영역으로 분리   
 -FixDiscountPolicy를 RateDiscountPolicy로 변경해도 구성 영역만 영향을 받고, 사용 영역은 전혀 영향을 받지 않음  
 -이제 할인 정책을 변경해도, 애플리케이션의 구성 역할을 담당하는 AppConfig만 변경하면 됨  
 - SRP(단일 책임 원칙)가 충족되어 짐 기존에는 OrderServiceImpl이 구현객체를 스스로 생성했지만 AppConfig로 책임을 넘김  
@@ -150,3 +149,69 @@ IoC 컨테이너, DI 컨테이너
  - 스프링 빈은 @Bean이 붙은 메서드의 명을 스프링 빈의 이름으로 사용  
  - 스프링 빈은 applicationContext.getBean() 메서드를 사용해서 찾을 수 있음  
  - 기존에는 개발자가 직접 자바코드로 모든것을 했다면 스프링 컨테이너에 객체를 스프링 빈으로 등록하고 스프링 컨테이너에서 스프링 빈을 찾아서 사용하도록 변경됨  
+
+스프링 컨테이너 생성
+![66](https://user-images.githubusercontent.com/35962655/124613522-46e4af00-deae-11eb-9339-54080a8374e9.PNG)
+- ApplicationContext는 인터페이스이자 스프링 컨테이너이다.  
+- 스프링 컨테이너는 XML을 기반으로 만들 수 있고, 애노테이션 기반의 자바 설정 클래스로 만들수 있다.  
+- AppConfig 사용했던 방식이 애노테이션 기반의 자바 설정 클래스로 스프링 컨테이너를 만든 것  
+- new AnnotationConfigApplicationContext(AppConfig.class)는 ApplicationContext의 구현체이다.  
+- 스프링 컨테이너를 생성할 때는 구성 정보를 지정해주어야 하는데 여기서는 AppConfig.class를 구성정보로 지정  
+
+스프링 빈 등록
+ - 스프링 컨테이너는 파라미터로 넘어온 설정 클래스 정보를 사용해서 스프링 빈을 등록한다.  
+ ![77](https://user-images.githubusercontent.com/35962655/124614446-3254e680-deaf-11eb-90cb-8c2e1ca53779.PNG)  
+빈 이름  
+-빈 이름은 메서드 이름을 사용한다.  
+-빈 이름을 직접 부여할 수 도 있음 ex) @bean(name="memberService2")   
+
+스프링 빈 의존관계 설정  
+- 스프링 컨테이너는 설정 정보를 참고해서 의존관계를 주입(DI)  
+
+컨테이너에 등록된 모든 빈 조회  
+- ac.getBeanDefinitionNames() : 스프링에 등록된 모든 빈 이름을 조회  
+- ac.getBean() : 빈 이름으로 빈 객체(인스턴스)를 조회  
+- 스프링 내부에서 사용하는 빈은 getRole()로 구분 가능하다. ROLE_APPLICATION은 사용자가 정의한 빈이다.  
+
+스프링 빈 조회 - 기본  
+ - 스프링 컨테이너에서 스프링 빈을 찾는 기본적인 방법  
+ - ac.getBean(빈 이름, 타입)  
+ - ac.getBean(타입)  
+ - 조회 대상 스프링 빈이 없으면 예외 발생(NoSuchBeanDefinitionException)  
+
+스프링 빈 조회 - 동일한 타입이 둘 이상  
+ - 타입으로 조회시 같은 타입의 스프링 빈이 둘 이상이면 오류 발생, 이때는 빈 이름 지정해야 함  
+ - ac.getBeansOfType()을 사용하면 해당 타입의 모든 빈 조회 가능  
+
+스프링 빈 조회 - 상속관계  
+ - 부모 타입으로 조회하면, 자식 타입도 함께 조회됨  
+ - 자바 객체의 최고 부모인 Object 타입으로 조회하면, 모든 스프링 빈 조회   
+
+BeanFactory와 ApplicationContext   
+BeanFactory  
+ - 스프링 컨테이너의 최상위 인터페이스  
+ - 스프링 빈을 관리하고 조회하는 역할, getBean() 제공  
+ - BeanFactory를 직접 사용할 일은 거의 없음  
+
+ApplicationContext  
+ -BeanFactory 기능을 모두 상속받아서 제공  
+ -빈을 관리하고 조회하는 기능은 물론이고, 수많은 부가기능 제공  
+ -BeanFactory나 ApplicationContext를 스프링 컨테이너라 한다.  
+ - 메시지소스를 활용한 국제화 기능 : 한국에서 들어오면 한국어로, 영어권에서 들어오면 영어로 출력  
+- 환경 변수 : 로컬, 개발, 운영 등을 구분해서 처리  
+- 애플리케이션 이벤트 : 이벤트를 발행하고 구독하는 모델을 지원  
+- 편리한 리소스 조회 : 파일, 클래스패스, 외부 등에서 리소스를 편리하게 조회  
+
+XML 설정 사용  
+ - 레거시 프로젝트에서 xml 을 사용하는 경우도 많다  
+ - GenericXmlApplicationContext를 사용하면서 xml 설정 파일을 넘긴다.  
+
+스프링 빈 설정 메타 정보 - BeanDefinition  
+- BeanDefinition이라는 추상화가 있기에 스프링은 다양한 설정 형식을 지원한다.  
+- XML 혹은 자바 코드를 읽어서 BeanDefinition을 만든다.  
+- 스프링 컨테이너는 자바 코드인지, XML인지 몰라도 된다. 오직 BeanDefinition만 알면 됨  
+- BeanDefinition을 빈 설정 메타정보라 한다.  
+- 스프링 컨테이너는 이 메타정보를 기반으로 스프링 빈 생성  
+
+- AnnotationConfigApplicationContext는 AnnotatedBeanDefinitionReader를 사용해서 AppConfig.class를 읽고 BeanDefinition 생성  
+- GenericXmlApplicationContext는 XmlBeanDefinitionReader를 사용해서 appConfig.xml 설정 정보를 읽고 BeanDefinition을 생성  
