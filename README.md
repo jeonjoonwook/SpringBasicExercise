@@ -81,3 +81,72 @@ DIP 위반
  - 클라이언트 코드의 변경 없이 기능 확장 가능  
  - 쉽게 부품을 교체하듯이 개발한다.  
  
+ 도메인 설계  
+ -역할과 구현을 분리해서 자유롭게 구 객체를 조립할 수 있게 설계한다.  
+ -회원 저장소와 할인 정책을 유연하게 변경 가능  
+ 
+ ![11](https://user-images.githubusercontent.com/35962655/124605367-cb333400-dea6-11eb-9ab7-ad5c50f82d80.PNG)
+  역할과 구현을 충실하게 분리 잘함  
+- 다형성도 활용하고, 인터페이스와 구현 객체를 분리 잘함  
+- OCP , DIP 설계 원칙을 준수한것처럼 보이지만 아니다.  
+DIP   
+ -클라이언트(OrderServiceImpl)은 DiscountPolicy 터페이스에 의존하여 DIP를 지킨것 같지만 FixDixcountPolicy같은 구체 클래스에도 의존하고 있으므로 DIP 위반  
+OCP  
+ - 기능을 확장하려면 클라이언트 코드에 영향을 주므로 OCP 위반  
+ ![22](https://user-images.githubusercontent.com/35962655/124605579-07ff2b00-dea7-11eb-809d-c96260b0a76b.PNG)  
+ - 인터페이스만 의존하도록 설계와 코드 변경  
+- 구현체가 없으므로 null pointer exception 발생  
+해결   
+- 누군가가 클라이언트인 OrderServiceImpl에 DiscountPolicy의 구현 객체를 대신 생성하고 주입해야함  
+AppConfig  
+- 애플리케이션의 전체 동작 방식을 구성하기 위해, 구현 객체를 생성하고, 연결하는 책임을 가지는 별도의 설정 클래스   
+ ![33](https://user-images.githubusercontent.com/35962655/124606040-7a700b00-dea7-11eb-9218-b6bd87e4915c.PNG)  
+ - AppConfig는 애플리케이션의 실제 동작에 필요한 구현 객체를 생성  
+  ex) MemberServiceImpl , MemoryMemberRepository, OrderSErviceImpl, FixDiscountPolicy  
+- AppConfig는 생성한 객체 인스턴스의 레퍼런스를 생성자를 통해서 주입해줌  
+  ex) MemberServiceImpl -> MemoryMemberRepository  
+       OrderServiceImpl -> MemoryMemberRepository, FixDiscountPolicy  
+ ![44](https://user-images.githubusercontent.com/35962655/124606382-cd49c280-dea7-11eb-8374-bcbe17200f15.PNG)
+ - 설계 변경으로 MemberServiceImpl은 MemoryMemberRepository를 의존하지 않음  
+- MemberServiceImpl 입장에서 어떤 구현객체가 들어올지 결정할수 없고 외부(AppConfig)에서 결정 
+- - 객체의 생성과 연결은 AppConfig가 담당  
+- DIP완성 : MemberServiceImpl은 MemberRepository인 추상에만 의존, 구체 클래스를 몰라도 된다.  
+- 관심사의 분리 : 객체를 생성하고 연결하는 역할과 실행하는 역할이 명확히 분리됨   
+-appConfig 객체는 memoryMemberRepository 객체를 생성하고 그 참조값을 memberServiceImple을 생성하면서 생성자로 전달  
+-클라이언트인 memberServiceImpl 입장에서 보면 의존관계를 마치 외부에서 주입해주는 것 같다고 해서 DI(Dependency Injection) 의존성 주입이라 한다. 
+
+할인 정책 적용  
+-AppConfig의 등장으로 애플리케이션이 크게 사용영역과, 객체를 생성하고 구성하는 영역으로 분리  
+![55](https://user-images.githubusercontent.com/35962655/124606840-3cbfb200-dea8-11eb-9d74-9cf04458894c.PNG)  
+-FixDiscountPolicy를 RateDiscountPolicy로 변경해도 구성 영역만 영향을 받고, 사용 영역은 전혀 영향을 받지 않음  
+-이제 할인 정책을 변경해도, 애플리케이션의 구성 역할을 담당하는 AppConfig만 변경하면 됨  
+- SRP(단일 책임 원칙)가 충족되어 짐 기존에는 OrderServiceImpl이 구현객체를 스스로 생성했지만 AppConfig로 책임을 넘김  
+- OCP도 만족함 , AppConfig가 의존관계를 변경해서 클라이언트 코드에 주입하므로 클라이언트 코드는 변경하지 않아도 됨  
+ 
+제어의 역전 IoC(Inversion of Controller)  
+ - 기존 프로그램은 클라이언트 구현 객체가 스스로 필요한 서버 구현 객체를 생성하고 연결하고 실행함, 즉 구현 객체가 프로그램의 제어 흐름을 스스로 조종  
+ - AppConfig가 등장한 이후 구현 객체(ex OrderServiceImpl)는 자신의 로직을 실행하는 역할만 담당, 프로그램 제어는 AppConfig가 한다.  
+ - 프로그램의 제어 흐름을 직접 제어하는 것이 아니라 외부에서 관리하는 것을 제어의 역전(IoC)라고 한다.  
+
+의존 관계 주입 DI(Dependency Injection)  
+ - OrderServiceImpl은 DiscountPolicy 인터페이스에 의존하지만 실제 어떤 구현 객체가 사용될지는 모름  
+ - 정적인 의존관계는 코드만 보고 판단 가능, OrderServiceImpl은 MemberRepository, DiscountPolicy에 의존한다. 하지만 실제 어떤 객체가 OrderServiceImpl에 주입될지는 모름  
+ - 동적인 객체 인스턴스 의존관계는 애플리케이션 실행 시점에 실제 생성된 객체 인스턴스의 참조가 연결된 의존관계  
+ - 애플리케이션 실행 시점(런타임)에 외부에서 실제 구현 객체를 생성하고 클라이언트에 전달해서 클라이언트와 서버의 실제 의존관계가 연결 되는 것을 의존관계 주입이라 한다.  
+ - 의존 관계 주입은 객체 인스턴스를 생성하고, 그 참조값을 전달해서 연결  
+ - 의존관계 주입을 사용하면 클라이언트 코드를 변경하지 않고, 클라이언트가 호출하는 대상의 타입 인스턴스를 변경할수 있음  
+
+IoC 컨테이너, DI 컨테이너  
+ - AppConfig처럼 객체를 생성하고 관리하면서 의존관계를 연결해 주는 것을 IoC 컨테이너 또는 DI컨테이너라 한다.  
+
+스프링으로 전환하기  
+-AppConfig에 설정을 구성한다는 뜻의 @Configuration을 붙여준다.  
+-각 메서드에 @Bean을 붙여준다. 이렇게 하면 스프링 컨테이너에 스프링 빈으로 등록된다.  
+
+스프링 컨테이너
+ -ApplicationContext를 스프링 컨테이너라 한다.  
+ -기존에는 개발자가 AppConfig를 사용하여 직접 객체를 생성하고 DI를 했지만, 이제부터는 스프링 컨테이너를 통해서 사용  
+ - 스프링 컨테이너는 @Configuration이 붙은 AppConfig를 설정 정보로 사용, 여기서 @Bean이라 적힌 메서드를 모두 호출해서 반환된 객체를 스프링 컨테이너에 등록한다. 이렇게 스프링 컨테이너에 등록된 객체를 스프링 빈이라고 한다.  
+ - 스프링 빈은 @Bean이 붙은 메서드의 명을 스프링 빈의 이름으로 사용  
+ - 스프링 빈은 applicationContext.getBean() 메서드를 사용해서 찾을 수 있음  
+ - 기존에는 개발자가 직접 자바코드로 모든것을 했다면 스프링 컨테이너에 객체를 스프링 빈으로 등록하고 스프링 컨테이너에서 스프링 빈을 찾아서 사용하도록 변경됨  
