@@ -277,4 +277,54 @@ XML 설정 사용
 -AppConfig가 순수한 AppConfig로 스프링 빈에 등록된다.  
 - 객체가 여러개 생성되면서 싱글턴이 보장되지 않는다. 서로 각각 다른 인스턴스가 출력되는 것이다.  
 - Bean만 사용해도 스프링 빈으로 등록되지만, 싱글톤을 보장하지 않음  
-- 스프링 설정 정보는 항상 @Configuration을 사용하여 싱글톤을 보장해야 한다.  
+- 스프링 설정 정보는 항상 @Configuration을 사용하여 싱글톤을 보장해야 한다.   
+
+컴포넌트 스캔  
+- 스프링 빈을 등록할 때는 자바 코드의 @Bean이나 XML의 <bean> 등을 설정 정보에 직접 등록했는데 등록해야 할 빈이 많아지면 일일이 등록하기 귀찮고, 설정 정보도 커지고 누락의 위험이 있다.  
+- 스프링은 설정 정보가 없어도 자동으로 스프링 빈을 등록하는 컴포넌트 스캔이라는 기능 제공  
+- 컴포넌트 스캔을 사용하려면 먼저 @ComponentScan을 설정 정보에 붙여준다.  
+- 컴포넌트 스캔은 @Component 애노테이션이 붙은 클래스를 스캔해서 스프링 빈으로 등록한다.  
+- MemoryMemberRepository, RateDiscountPolicy @Component 추가   
+- MemberServiceImpl @Component, @Autowired 추가  
+ 
+ @ComponentScan  
+ - @ComponentScan은 @Component가 은 모든 클래스를 스프링 빈으로 등록  
+ - 스프링 빈의 기본 이름은 클래스명을 사용하되 맨 앞글자만 소문자를 사용  
+    ex) MemberServiceImpl 클래스 -> memberServiceImpl  
+ - 빈 이름을 직접 지정하고 싶으면 @Component("memberService2") 이런식으로 이름 부여  
+ 
+ @Autowired 의존관계 자동 주입  
+ - 생성자에 @Autowired를 지정하면, 스프링 컨테이너가 자동으로 해당 스프링 빈을 찾아서 주입한다.  
+ - 타입이 같은 빈을 찾아서 주입  
+ 
+탐색 위치와 기본 스캔 대상  
+ - 모든 자바 클래스를 다 컴포넌트 스캔하면 시간이 오래 걸리므로 필요한 위치부터 탐색하도록 한다.  
+ - basePackages : 탐색할 패키지의 시작 위치를 지정, 이 패키지를 포함하여 하위 패키지를 모두 탐색  
+- basePackages : {"hello.core", "hello.service"} 이런식으로 여러 시작 위치를 지정할 수 있음  
+- basePackageClasses : 지정한 클래스의 패키지를 탐색 시작 위치로 지정  
+- 지정하지 않으면 @ComponentScan이 붙은 설정 정보 클래스의 패키지가 시작 위치가 됨  
+ 
+권장 방법  
+ -패키지 위치를 지정하지 않고, 설정 정보 클래스의 위치를 프로젝트 최상단에 두는 것  
+ex) com.hello 가 프로젝트 시작 루트 라면 여기에 AppConfig 같은 메인 설정 정보 두고, @ComponentScan 붙이고 basePackages 지정은 생략  
+ 
+ 컴포넌트 스캔 대상  
+ - @Component : 컴포넌트 스캔에서 사용  
+ - @Controller : 스프링 MVC 컨트롤러에서 사용  
+ - @Service : 스프링 비즈니스 로직에서 사용  
+ - @Repository : 스프링 데이터 접근 계층에서 사용  
+ - @Configuration : 스프링 설정 정보에서 사용   
+
+필터  
+ - includeFilters : 컴포넌트 스캔 대상을 추가로 지정  
+ - excludeFilters : 컴포넌트 스캔에서 제외할 대상을 지정  
+ 
+FilterType 옵션  
+ - ANNOTATION : 기본값, 애노테이션을 인식해서 동작  
+ - ASSIGNABLE_TYPE : 지정한 타입과 자식 타입을 인식해서 동작  
+ - 옵션을 변경하면서 사용하기보다는 스프링의 기본 설정에 최대한 맞추어 사용하는 것을 권장  
+
+수동 빈 등록 vs 자동 빈 등록  
+ - 최근 스프링 부트는 수동 빈 등록 이름과 자동 빈 등록 이름이 충돌나면 오류가 발생하도록 기본 값을 바꿈  
+ - 이름이 충돌나지 않게 설정하자.  
+ 
