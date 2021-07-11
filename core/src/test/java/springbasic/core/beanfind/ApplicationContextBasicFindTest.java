@@ -10,6 +10,7 @@ import springbasic.core.member.MemberService;
 import springbasic.core.member.MemberServiceImpl;
 
 public class ApplicationContextBasicFindTest {
+
     AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(AppConfig.class);
 
     @Test
