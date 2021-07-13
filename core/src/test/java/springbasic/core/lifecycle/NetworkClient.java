@@ -33,6 +33,19 @@ public class NetworkClient{
         System.out.println("close: "+ url);
     }
 
+    @PostConstruct
+    public void init() {
+        System.out.println("NetworkClient.init");
+        connect();
+        call("초기화 연결 메세지");
+    }
+
+    @PreDestroy
+    public void close() {
+        System.out.println("NetworkClient.close");
+        disconnect();
+    }
+
     /*
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -47,16 +60,5 @@ public class NetworkClient{
         disconnect();
     }
     */
-    @PostConstruct
-    public void init() {
-        System.out.println("NetworkClient.init");
-        connect();
-        call("초기화 연결 메세지");
-    }
 
-    @PreDestroy
-    public void close() {
-        System.out.println("NetworkClient.close");
-        disconnect();
-    }
 }
